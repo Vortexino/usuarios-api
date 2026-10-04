@@ -1,7 +1,3 @@
-# ============================================================
-# Parseo del único secret DATABASE_URL en sus partes (host, db,
-# usuario, password)
-# ============================================================
 terraform {
   backend "s3" {
     bucket = "usuarios-api-tfstate-909807414412"
@@ -10,6 +6,10 @@ terraform {
   }
 }
 
+# ============================================================
+# Parseo del único secret DATABASE_URL en sus partes (host, db,
+# usuario, password)
+# ============================================================
 locals {
   db_parts = regex(
     "postgresql://(?P<user>[^:]+):(?P<pass>[^@]+)@(?P<host>[^/]+)/(?P<db>[^?]+)",
@@ -117,10 +117,15 @@ resource "aws_lambda_function" "api" {
   runtime       = "java21"
   memory_size   = var.lambda_memory_mb
   timeout       = var.lambda_timeout_seconds
+  publish       = true
 
   s3_bucket         = aws_s3_bucket.lambda_artifacts.id
   s3_key            = aws_s3_object.lambda_jar.key
   source_code_hash  = filebase64sha256(var.lambda_jar_path)
+
+  snap_start {
+    apply_on = "PublishedVersions"
+  }
 
   environment {
     variables = {
@@ -140,6 +145,12 @@ resource "aws_lambda_function" "api" {
   ]
 }
 
+resource "aws_lambda_alias" "live" {
+  name             = "live"
+  function_name    = aws_lambda_function.api.function_name
+  function_version = aws_lambda_function.api.version
+}
+
 # ============================================================
 # API Gateway: HTTP API
 # ============================================================
@@ -157,7 +168,7 @@ resource "aws_apigatewayv2_api" "api" {
 resource "aws_apigatewayv2_integration" "lambda" {
   api_id                 = aws_apigatewayv2_api.api.id
   integration_type       = "AWS_PROXY"
-  integration_uri        = aws_lambda_function.api.invoke_arn
+  integration_uri        = aws_lambda_alias.live.invoke_arn
   payload_format_version = "2.0"
 }
 
@@ -183,6 +194,7 @@ resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.api.function_name
+  qualifier     = aws_lambda_alias.live.name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/*"
 }
