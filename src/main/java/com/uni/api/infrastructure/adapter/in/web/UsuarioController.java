@@ -54,7 +54,6 @@ public class UsuarioController {
     public UsuarioResponse subirFoto(@PathVariable Long id,
                                      @RequestParam("archivo") MultipartFile archivo) throws IOException {
         String nombreGuardado = fileStorage.guardar(archivo.getOriginalFilename(), archivo.getBytes());
-        String url = "/uploads/" + nombreGuardado;
-        return UsuarioResponse.de(usuarios.actualizarFoto(id, url));
+        return UsuarioResponse.de(usuarios.actualizarFoto(id, nombreGuardado));
     }
 }

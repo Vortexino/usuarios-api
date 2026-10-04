@@ -1,6 +1,7 @@
 package com.uni.api.infrastructure.adapter.out.storage;
 
 import com.uni.api.application.port.out.FileStoragePort;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,6 +9,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 @Component
+@Profile("!lambda")
 public class LocalFileStorageAdapter implements FileStoragePort {
 
     private final Path carpeta = Path.of("uploads");
@@ -32,6 +34,6 @@ public class LocalFileStorageAdapter implements FileStoragePort {
         } catch (IOException e) {
             throw new RuntimeException("No se pudo guardar el archivo", e);
         }
-        return nombreUnico;
+        return "/uploads/" + nombreUnico;
     }
 }
