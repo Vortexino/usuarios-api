@@ -100,7 +100,7 @@ resource "aws_iam_role_policy" "lambda_s3_access" {
 }
 
 # ============================================================
-# CloudWatch: grupo de logs de la función
+# CloudWatch: grupo de logs de la función.
 # ============================================================
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${var.project_name}"
