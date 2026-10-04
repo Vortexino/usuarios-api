@@ -2,6 +2,14 @@
 # Parseo del único secret DATABASE_URL en sus partes (host, db,
 # usuario, password)
 # ============================================================
+terraform {
+  backend "s3" {
+    bucket = "usuarios-api-tfstate-909807414412"
+    key    = "usuarios-api/terraform.tfstate"
+    region = "us-east-2"
+  }
+}
+
 locals {
   db_parts = regex(
     "postgresql://(?P<user>[^:]+):(?P<pass>[^@]+)@(?P<host>[^/]+)/(?P<db>[^?]+)",
