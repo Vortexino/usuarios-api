@@ -42,6 +42,9 @@ resource "aws_s3_bucket_policy" "uploads_public_read" {
     }]
   })
 
+  depends_on = [aws_s3_bucket_public_access_block.uploads]
+}
+
 resource "aws_s3_bucket" "lambda_artifacts" {
   bucket = "${var.project_name}-lambda-artifacts-${data.aws_caller_identity.current.account_id}"
 }
@@ -51,9 +54,6 @@ resource "aws_s3_object" "lambda_jar" {
   key    = "lambda.jar"
   source = var.lambda_jar_path
   etag   = filemd5(var.lambda_jar_path)
-}
-
-  depends_on = [aws_s3_bucket_public_access_block.uploads]
 }
 
 # ============================================================
