@@ -37,3 +37,8 @@ variable "jwt_secret" {
   type      = string
   sensitive = true
 }
+
+variable "ses_sender_email" {
+  description = "Correo verificado en SES desde el cual se envían las notificaciones"
+  type        = string
+}

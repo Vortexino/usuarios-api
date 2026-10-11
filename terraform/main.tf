@@ -136,6 +136,7 @@ resource "aws_lambda_function" "api" {
       JWT_SECRET                 = var.jwt_secret
       APP_S3_BUCKET_NAME         = aws_s3_bucket.uploads.bucket
       APP_S3_REGION              = var.aws_region
+      SNS_TOPIC_ARN              = aws_sns_topic.notifications.arn
     }
   }
 
